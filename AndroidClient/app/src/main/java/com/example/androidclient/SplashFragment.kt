@@ -1,10 +1,8 @@
 package com.example.androidclient
 
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -25,13 +23,11 @@ class SplashFragment : Fragment() {
 
         val result = checkPermissions()
         if(result){
-            findNavController().navigate(R.id.action_splashFragment_to_addressListFragment)
+            findNavController().navigate(R.id.action_splashFragment_to_contactsListFragment)
         }
     }
 
     private fun checkPermissions(): Boolean {
-        val permissions =
-            listOf(Manifest.permission.READ_CALL_LOG, Manifest.permission.WRITE_CALL_LOG)
         val requestList = ArrayList<String>()
         for (permission in permissions) {
             val check = ContextCompat.checkSelfPermission(requireActivity(), permission)
@@ -60,6 +56,6 @@ class SplashFragment : Fragment() {
                 return
             }
         }
-        findNavController().navigate(R.id.action_splashFragment_to_addressListFragment)
+        findNavController().navigate(R.id.action_splashFragment_to_contactsListFragment)
     }
 }
