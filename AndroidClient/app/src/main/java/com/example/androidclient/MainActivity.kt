@@ -6,29 +6,76 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.view.MenuItem
+import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.main_content.*
 
 class MainActivity : AppCompatActivity() {
-
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        initViewModel()
+        initViews()
+
+        if (checkPermissions()) {
+            getMainViewModel().mainStateLiveData.value = SHOW_CONTENT
+        } else {
+            getMainViewModel().mainStateLiveData.value = REQUEST_PERMISSIONS
+            requestPermissions(permissions.toTypedArray(), 101)
+        }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
+    private fun initViews() {
+        bottomTab.setOnNavigationItemSelectedListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.item_local_contact -> {
+                    viewPager.setCurrentItem(0, true)
+                }
+                R.id.item_cloud_contact -> {
+                    viewPager.setCurrentItem(1, true)
+                }
+                R.id.item_sync -> {
+                    viewPager.setCurrentItem(2, true)
+                }
+            }
+            true
+        }
+    }
+
+    private fun initViewModel() {
+        getMainViewModel().mainStateLiveData.observe(this, Observer {
+            if (it == REQUEST_PERMISSIONS) {
+                textView.text = "Welcome"
+                textView.visibility = View.VISIBLE
+                viewPager.visibility = View.GONE
+                bottomTab.visibility = View.GONE
+            } else if (it == SHOW_CONTENT) {
+                textView.visibility = View.GONE
+                viewPager.visibility = View.VISIBLE
+                bottomTab.visibility = View.VISIBLE
+            }
+        })
+    }
+
+    private fun getMainViewModel(): MainViewModel {
+        return ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
+
     private fun checkPermissions(): Boolean {
-        val requestList = ArrayList<String>()
         for (permission in permissions) {
             val check = ContextCompat.checkSelfPermission(this, permission)
             if (check == PackageManager.PERMISSION_DENIED) {
-                requestList.add(permission)
+                return false
             }
         }
-        if (requestList.isEmpty()) {
-            return true
-        }
-        requestPermissions(permissions.toTypedArray(), 101)
-        return false
+        return true
     }
 
     private fun readLocalContacts(): List<Person> {
