@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="local_contact"
+        android:icon="@mipmap/local_contact"
+        android:title="本地联系人" />
+    <item
+        android:id="local_contact"
+        android:icon="@mipmap/cloud_contact"
+        android:title="云端联系人" />
+    <item
+        android:id="local_contact"
+        android:icon="@mipmap/sync"
+        android:title="同步" />
+</menu>
