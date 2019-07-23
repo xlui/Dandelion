@@ -1,6 +1,5 @@
-package com.example.androidclient
+package com.example.androidclient.main
 
-import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +11,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.example.androidclient.R
+import com.example.androidclient.common.REQUEST_PERMISSIONS
+import com.example.androidclient.common.SHOW_CONTENT
+import com.example.androidclient.common.permissions
+import com.example.androidclient.entity.Person
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.main_content.*
 
@@ -25,9 +29,11 @@ class MainActivity : AppCompatActivity() {
         initViews()
 
         if (checkPermissions()) {
-            getMainViewModel().mainStateLiveData.value = SHOW_CONTENT
+            getMainViewModel().mainStateLiveData.value =
+                SHOW_CONTENT
         } else {
-            getMainViewModel().mainStateLiveData.value = REQUEST_PERMISSIONS
+            getMainViewModel().mainStateLiveData.value =
+                REQUEST_PERMISSIONS
             requestPermissions(permissions.toTypedArray(), 101)
         }
     }

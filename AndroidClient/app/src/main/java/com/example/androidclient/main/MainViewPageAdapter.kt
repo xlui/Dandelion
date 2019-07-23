@@ -1,4 +1,4 @@
-package com.example.androidclient
+package com.example.androidclient.main
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

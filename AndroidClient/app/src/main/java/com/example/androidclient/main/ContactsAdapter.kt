@@ -1,4 +1,4 @@
-package com.example.androidclient
+package com.example.androidclient.main
 
 import android.view.View
 import android.view.ViewGroup
