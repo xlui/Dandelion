@@ -6,8 +6,8 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-suspend fun register(baseUrl: String, userName: String, password: String) =
-    withContext(Dispatchers.IO) {
+suspend fun register(baseUrl: String, userName: String, password: String): Boolean {
+    return withContext(Dispatchers.IO) {
         val service = getRetrofitService(baseUrl, Service::class.java)
         val call = service.register(User(userName = userName, password = password))
         val registerResponse = call.execute().body()
@@ -17,9 +17,10 @@ suspend fun register(baseUrl: String, userName: String, password: String) =
         }
         false
     }
+}
 
-suspend fun login(baseUrl: String, userName: String, password: String) =
-    withContext(Dispatchers.IO) {
+suspend fun login(baseUrl: String, userName: String, password: String): String {
+    return withContext(Dispatchers.IO) {
         val service = getRetrofitService(baseUrl, Service::class.java)
         val call = service.login(User(userName = userName, password = password))
         val loginResponse = call.execute().body()
@@ -28,6 +29,7 @@ suspend fun login(baseUrl: String, userName: String, password: String) =
         }
         ""
     }
+}
 
 fun <T> getRetrofitService(baseUrl: String, clazz: Class<T>): T {
     val retrofit = Retrofit.Builder()

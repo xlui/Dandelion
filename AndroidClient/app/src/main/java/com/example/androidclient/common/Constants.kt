@@ -9,3 +9,5 @@ val permissions = listOf(
 
 const val REQUEST_PERMISSIONS = "request_permission"
 const val SHOW_CONTENT = "show_content"
+
+const val SP_NAME = "my_shared_preference"
