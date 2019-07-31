@@ -2,20 +2,18 @@ package com.example.androidclient.login
 
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.androidclient.R
 import com.example.androidclient.common.login
 import com.example.androidclient.common.register
+import com.example.androidclient.entity.User
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
-class LoginActivity : AppCompatActivity(),CoroutineScope by MainScope(){
+class LoginActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val viewModel: LoginViewModel by lazy {
         ViewModelProviders.of(this).get(LoginViewModel::class.java)
     }
@@ -36,24 +34,30 @@ class LoginActivity : AppCompatActivity(),CoroutineScope by MainScope(){
     }
 
     private fun initView() {
-        loginButton.setOnClickListener {
-//            launch {
-//                val loginResult = login("","","")
-//                if(loginResult.isEmpty()){
-//
-//                }else{
-//
-//                }
-//            }
+        buttonLogin.setOnClickListener {
+            val userName = inputUsername.editText?.toString()
+            val password = inputPassword.editText?.toString()
+            if (userName == null || password == null) {
+                return@setOnClickListener
+            }
+            launch(Dispatchers.Main) {
+                val token = login("", userName, password)
+
+            }
         }
 
-        registerButton.setOnClickListener {
-            launch {
-                val registerResult = register("","","")
-                if(registerResult){
+        textRegister.setOnClickListener {
+            val userName = inputUsername.editText?.toString()
+            val password = inputPassword.editText?.toString()
+            if (userName == null || password == null) {
+                return@setOnClickListener
+            }
+            launch(Dispatchers.Main) {
+                val registerResult = register("", userName, password)
+                if (!registerResult) {
 
-                }else{
-                    Toast.makeText(this@LoginActivity,"注册失败",Toast.LENGTH_SHORT).show()
+                } else {
+
                 }
             }
         }
