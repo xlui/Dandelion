@@ -2,12 +2,11 @@ package com.example.androidclient.main
 
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -15,7 +14,6 @@ import com.example.androidclient.R
 import com.example.androidclient.common.REQUEST_PERMISSIONS
 import com.example.androidclient.common.SHOW_CONTENT
 import com.example.androidclient.common.permissions
-import com.example.androidclient.entity.Person
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {

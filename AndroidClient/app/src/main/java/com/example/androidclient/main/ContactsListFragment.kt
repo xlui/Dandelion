@@ -20,6 +20,17 @@ class ContactsListFragment : Fragment() {
     private var type = TYPE_LOCAL
     private var token = ""
 
+    companion object {
+        fun newInstance(type: String = TYPE_LOCAL, token: String = ""): ContactsListFragment {
+            val bundle = Bundle()
+            bundle.putString(TYPE,type)
+            bundle.putString(TOKEN,token)
+            val fragment = ContactsListFragment()
+            fragment.arguments = bundle
+            return fragment
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,8 +69,8 @@ class ContactsListFragment : Fragment() {
         }
     }
 
-    fun fillLocal(recyclerView: RecyclerView) {
-        val dataList= readLocalContacts()
+    private fun fillLocal(recyclerView: RecyclerView) {
+        val dataList = readLocalContacts()
         adapter.setData(dataList)
         recyclerView.adapter = adapter
     }
