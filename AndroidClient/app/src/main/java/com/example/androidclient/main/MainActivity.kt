@@ -17,7 +17,6 @@ import com.example.androidclient.common.SHOW_CONTENT
 import com.example.androidclient.common.permissions
 import com.example.androidclient.entity.Person
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.main_content.*
 
 class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
@@ -53,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
     }
 
     private fun initViewModel() {
@@ -84,29 +84,5 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun readLocalContacts(): List<Person> {
-        val cursor = contentResolver.query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            null,
-            null,
-            null,
-            null
-        )
-        if (cursor != null) {
-            val result = ArrayList<Person>()
-            while (cursor.moveToNext()) {
-                // 获取联系人姓名
-                val name =
-                    cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
-                // 获取联系人手机号
-                val number =
-                    cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                result.add(Person(name, number))
-            }
-            cursor.close()
-            return result
-        }
 
-        return emptyList()
-    }
 }

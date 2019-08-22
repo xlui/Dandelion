@@ -2,15 +2,18 @@ package com.example.androidclient.login
 
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.androidclient.R
 import com.example.androidclient.common.login
 import com.example.androidclient.common.register
-import com.example.androidclient.entity.User
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 
 class LoginActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -41,8 +44,12 @@ class LoginActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 return@setOnClickListener
             }
             launch(Dispatchers.Main) {
-                val token = login("", userName, password)
+                val token = login(userName, password)
+                if (token.isEmpty()) {
+                    Toast.makeText(this@LoginActivity, "登陆失败了", Toast.LENGTH_SHORT).show()
+                }else{
 
+                }
             }
         }
 
@@ -53,13 +60,21 @@ class LoginActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 return@setOnClickListener
             }
             launch(Dispatchers.Main) {
-                val registerResult = register("", userName, password)
+                val registerResult = register(userName, password)
                 if (!registerResult) {
-
+                    Toast.makeText(this@LoginActivity, "注册失败了", Toast.LENGTH_SHORT).show()
                 } else {
+                    Toast.makeText(this@LoginActivity, "注册成功，尝试使用此账号登陆", Toast.LENGTH_SHORT).show()
+                    val token = login(userName, password)
+                    if (token.isEmpty()) {
+                        Toast.makeText(this@LoginActivity, "登陆失败了", Toast.LENGTH_SHORT).show()
+                    } else {
 
+                    }
                 }
             }
         }
     }
+
+
 }
