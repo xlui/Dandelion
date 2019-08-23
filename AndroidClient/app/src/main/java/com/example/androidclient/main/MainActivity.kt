@@ -51,6 +51,14 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+
+        val localFragment = LocalListFragment.newInstance()
+        val cloudyFragment = CloudyListFragment.newInstance()
+        val syncFragment = SyncFragment()
+        val pageAdapter = MainViewPageAdapter(supportFragmentManager)
+        pageAdapter.setFragments(arrayListOf(localFragment, cloudyFragment, syncFragment))
+        viewPager.offscreenPageLimit = 0
+        viewPager.adapter = pageAdapter
     }
 
     private fun initViewModel() {
@@ -82,5 +90,22 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults.isNotEmpty()) {
+            grantResults.forEach {
+                if (it != PackageManager.PERMISSION_GRANTED) {
+                    return
+                }
+            }
+            getMainViewModel().mainStateLiveData.value =
+                SHOW_CONTENT
+        } else {
+            return
+        }
+    }
 }

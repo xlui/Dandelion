@@ -8,35 +8,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.androidclient.common.TOKEN
-import com.example.androidclient.common.TYPE
-import com.example.androidclient.common.TYPE_LOCAL
 import com.example.androidclient.entity.Person
 
 
-class ContactsListFragment : Fragment() {
+class LocalListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ContactsAdapter
-    private var type = TYPE_LOCAL
-    private var token = ""
 
     companion object {
-        fun newInstance(type: String = TYPE_LOCAL, token: String = ""): ContactsListFragment {
-            val bundle = Bundle()
-            bundle.putString(TYPE,type)
-            bundle.putString(TOKEN,token)
-            val fragment = ContactsListFragment()
-            fragment.arguments = bundle
-            return fragment
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            type = it.getString(TYPE, TYPE_LOCAL)
-            token = it.getString(TOKEN, "")
+        fun newInstance(): LocalListFragment {
+            return LocalListFragment()
         }
     }
 
@@ -49,7 +30,7 @@ class ContactsListFragment : Fragment() {
             return View(context)
         }
         recyclerView = RecyclerView(context!!)
-        recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         val layoutParam = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -62,11 +43,7 @@ class ContactsListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (type == TYPE_LOCAL) {
-            fillLocal(recyclerView)
-        } else {
-
-        }
+        fillLocal(recyclerView)
     }
 
     private fun fillLocal(recyclerView: RecyclerView) {

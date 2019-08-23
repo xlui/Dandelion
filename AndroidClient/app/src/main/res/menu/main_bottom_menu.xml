@@ -3,14 +3,14 @@
 
     <item
         android:id="@+id/item_local_contact"
-        android:icon="@drawable/local_contact"
+        android:icon="@mipmap/local_contact"
         android:title="本地联系人" />
     <item
         android:id="@+id/item_cloud_contact"
-        android:icon="@drawable/cloud_contact"
+        android:icon="@mipmap/cloud_contact"
         android:title="云端联系人" />
     <item
         android:id="@+id/item_sync"
-        android:icon="@drawable/sync"
+        android:icon="@mipmap/sync"
         android:title="同步" />
 </menu>
