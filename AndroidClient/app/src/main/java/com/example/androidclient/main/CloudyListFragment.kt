@@ -6,39 +6,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.androidclient.common.TOKEN
+import com.example.androidclient.common.getSPString
 import com.example.androidclient.common.pull
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
 class CloudyListFragment : Fragment() {
+    private val mainViewModel by lazy {
+        ViewModelProviders.of(context as MainActivity).get(MainViewModel::class.java)
+    }
     private lateinit var adapter: ContactsAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var refreshLayout: SwipeRefreshLayout
     private val scope = MainScope()
-    var token = ""
-        set(value) {
-            field = value
-            refresh()
-        }
 
     companion object {
-        fun newInstance(token: String = ""): CloudyListFragment {
-            val fragment = CloudyListFragment()
-            val bundle = Bundle()
-            bundle.putString(TOKEN, token)
-            fragment.arguments = bundle
-            return fragment
+        fun newInstance(): CloudyListFragment {
+            return CloudyListFragment()
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        token = arguments?.getString(TOKEN, "") ?: ""
     }
 
     override fun onCreateView(
@@ -79,6 +70,7 @@ class CloudyListFragment : Fragment() {
     private fun refresh() = scope.launch {
         refreshLayout.isRefreshing = true
         try {
+            val token = mainViewModel.getToken()
             val header = mapOf("Authorization" to token)
             val pullResult = pull(header)
             val persons = pullResult.persons

@@ -10,9 +10,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.example.androidclient.R
-import com.example.androidclient.common.USER_NAME
-import com.example.androidclient.common.getSPString
+import com.example.androidclient.event.UserNameEvent
 import com.example.androidclient.login.LoginActivity
 import com.example.androidclient.url_setting.UrlSettingActivity
 import kotlinx.android.synthetic.main.fragment_sync.view.*
@@ -21,7 +22,9 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
 class SyncFragment : Fragment() {
-    private lateinit var textView: TextView
+    private val mainViewModel by lazy {
+        ViewModelProviders.of(context as MainActivity).get(MainViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,9 +68,14 @@ class SyncFragment : Fragment() {
             startActivity(Intent(context, LoginActivity::class.java))
         }
 
-        textView = view.textLoginStatus
-        val text = getSPString(context!!, USER_NAME)
-        updateTextView(text)
+        mainViewModel.userName.observe(context as MainActivity, Observer { text ->
+            if (text.isEmpty()) {
+                view.textLoginStatus.text = "未登陆"
+                return@Observer
+            }
+            view.textLoginStatus.text = text
+        })
+        mainViewModel.userName.value = mainViewModel.getUserName()
     }
 
     private fun pushData() {
@@ -108,15 +116,11 @@ class SyncFragment : Fragment() {
             .create()
         dialog.show()
         return dialog
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun updateTextView(text: String) {
-        if (text.isEmpty()) {
-            textView.text = "未登陆"
-        }
-        textView.text = text
+    fun updateTextView(event:UserNameEvent) {
+        mainViewModel.userName.value = event.userName
     }
 
     override fun onDestroy() {

@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -18,6 +17,10 @@ import com.example.androidclient.common.permissions
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    private val mainViewModel by lazy {
+        ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,10 +30,10 @@ class MainActivity : AppCompatActivity() {
         initViews()
 
         if (checkPermissions()) {
-            getMainViewModel().mainStateLiveData.value =
+            mainViewModel.mainStateLiveData.value =
                 SHOW_CONTENT
         } else {
-            getMainViewModel().mainStateLiveData.value =
+            mainViewModel.mainStateLiveData.value =
                 REQUEST_PERMISSIONS
             requestPermissions(permissions.toTypedArray(), 101)
         }
@@ -62,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-        getMainViewModel().mainStateLiveData.observe(this, Observer {
+        mainViewModel.mainStateLiveData.observe(this, Observer {
             if (it == REQUEST_PERMISSIONS) {
                 textView.text = "Welcome"
                 textView.visibility = View.VISIBLE
@@ -74,10 +77,7 @@ class MainActivity : AppCompatActivity() {
                 bottomTab.visibility = View.VISIBLE
             }
         })
-    }
-
-    private fun getMainViewModel(): MainViewModel {
-        return ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mainViewModel.initSpValue(this)
     }
 
     private fun checkPermissions(): Boolean {
@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
             }
-            getMainViewModel().mainStateLiveData.value =
+            mainViewModel.mainStateLiveData.value =
                 SHOW_CONTENT
         } else {
             return
