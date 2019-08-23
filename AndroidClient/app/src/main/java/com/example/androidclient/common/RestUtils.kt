@@ -43,12 +43,8 @@ suspend fun push(headerMap: Map<String, String>, contactsEntity: ContactsEntity)
 
 fun <T> getRetrofitService(clazz: Class<T>): T {
     val retrofit = Retrofit.Builder()
-        .baseUrl(getBaseUrl())
+        .baseUrl(baseUrl)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     return retrofit.create(clazz)
-}
-
-fun getBaseUrl(): String {
-    return ""
 }

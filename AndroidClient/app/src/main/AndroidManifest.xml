@@ -15,8 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".login.LoginActivity"/>
-
+        <activity android:name=".url_setting.UrlSettingActivity"></activity>
+        <activity android:name=".login.LoginActivity" />
         <activity
             android:name=".main.MainActivity"
             android:launchMode="singleTask">
@@ -27,6 +27,5 @@
             </intent-filter>
         </activity>
     </application>
-
 
 </manifest>
