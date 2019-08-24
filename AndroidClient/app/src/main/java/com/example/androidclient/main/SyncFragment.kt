@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -83,14 +84,19 @@ class SyncFragment : Fragment() {
 
     private fun pushData() = scope.launch {
         val dialog = createProgressDialog()
-        mainViewModel.push()
+        val result = mainViewModel.push()
+        if (!result) {
+            Toast.makeText(context, "push失败，检查网络或者重新登陆", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "push成功", Toast.LENGTH_SHORT).show()
+        }
         dialog.cancel()
     }
 
 
     private fun pullData() = scope.launch {
         val dialog = createProgressDialog()
-        mainViewModel.merge()
+        mainViewModel.merge(context!!)
         dialog.cancel()
     }
 

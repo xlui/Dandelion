@@ -11,11 +11,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import android.util.Log
+import com.google.gson.Gson
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import com.example.androidclient.entity.RegisterEntity
+import java.lang.Exception
 
 
 class LoginViewModel : ViewModel() {
-    val userName = MutableLiveData<String>()
-    val password = MutableLiveData<String>()
+    private val userName = MutableLiveData<String>()
+    private val password = MutableLiveData<String>()
 
     fun initSpVaLue(context: Context) {
         userName.value = getSPString(context, USER_NAME)
@@ -26,23 +33,23 @@ class LoginViewModel : ViewModel() {
         withContext(Dispatchers.IO) {
             val service = getRetrofitService(Service::class.java)
             val call = service.register(User(userName, password))
+            Log.e("xkf", baseUrl)
             val registerEntity = call.execute().body()
-
             if (registerEntity != null && registerEntity.error == null) {
                 return@withContext true
             }
-            Log.e("xkf", registerEntity?.error ?: "空")
-            false
+            Log.e("xkf", registerEntity?.error ?: "")
+            return@withContext false
         }
 
     suspend fun login(userName: String, password: String): String = withContext(Dispatchers.IO) {
         val service = getRetrofitService(Service::class.java)
-        val call = service.login(User(userName = userName, password = password))
+        val call = service.login(User(username = userName, password = password))
         val loginEntity = call.execute().body()
         if (loginEntity != null) {
-            return@withContext loginEntity.token
+            return@withContext loginEntity.token ?: ""
         }
-        ""
+        return@withContext ""
     }
 
     fun getUserName(): String = userName.value ?: ""

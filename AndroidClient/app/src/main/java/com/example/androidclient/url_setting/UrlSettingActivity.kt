@@ -51,8 +51,8 @@ class UrlSettingActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 Toast.makeText(this, "输入为空", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            if (url.endsWith("/")) {
-                url = url.substring(0, url.length - 1)
+            if (!url.endsWith("/")) {
+                url = "$url/"
             }
             saveSPString(this, BASE_URL, url)
             baseUrl = url

@@ -76,12 +76,12 @@ class CloudyListFragment : Fragment() {
     private fun refresh() = scope.launch {
         refreshLayout.isRefreshing = true
         try {
-            val pullResult = mainViewModel.pull()
-            val persons = pullResult.persons
-            if (persons.isEmpty()) {
+            val data = mainViewModel.pull()
+            if (data.isEmpty()) {
                 Toast.makeText(context, "token无效或云端没有联系人，尝试重新登陆或上传数据", Toast.LENGTH_SHORT).show()
+                return@launch
             }
-            adapter.setData(persons)
+            adapter.setData(data)
         } catch (e: Exception) {
             Toast.makeText(context, "拉取云端联系人人失败，尝试重新登陆或设置url", Toast.LENGTH_SHORT).show()
         }
