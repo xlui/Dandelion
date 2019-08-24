@@ -10,6 +10,17 @@
 4. 客户端需要支持动态更换服务器的 URL
 5. 服务器实现尽量简洁并支持 Docker 启动，做到随用随开，不用就停。
 
+## Docker
+
+服务端现已支持 Docker 启动：
+
+```bash
+docker pull xlui/dandelion
+docker run --name dandelion -p 127.0.0.1:5000:5000 -d xlui/dandelion
+```
+
+[Docker: Dandelion](https://cloud.docker.com/u/xlui/repository/docker/xlui/dandelion)
+
 # License
 
 MIT.
