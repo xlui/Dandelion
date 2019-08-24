@@ -5,14 +5,16 @@ import android.provider.ContactsContract
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.androidclient.common.*
+import com.example.androidclient.entity.ContactsEntity
 import com.example.androidclient.entity.Person
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
     val mainStateLiveData = MutableLiveData<String>()
     val userName = MutableLiveData<String>()
-    val password = MutableLiveData<String>()
     val token = MutableLiveData<String>()
-    val baseurl = MutableLiveData<String>()
+    val localContacts = MutableLiveData<MutableList<Person>>()
 
     init {
         mainStateLiveData.value = REQUEST_PERMISSIONS
@@ -20,12 +22,14 @@ class MainViewModel : ViewModel() {
 
     fun initSpValue(context: Context) {
         userName.value = getSPString(context, USER_NAME)
-        password.value = getSPString(context, PASSWORD)
         token.value = getSPString(context, TOKEN)
-        baseurl.value = getSPString(context, BASE_URL)
+        baseUrl = getSPString(context, BASE_URL)
+        println()
     }
 
-    fun readLocalContacts(context: Context): List<Person> {
+    fun readLocalContacts(context: Context) {
+        val list: MutableList<Person> = localContacts.value ?: mutableListOf()
+        list.clear()
         val cursor = context.contentResolver?.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             null,
@@ -34,7 +38,6 @@ class MainViewModel : ViewModel() {
             null
         )
         if (cursor != null) {
-            val result = ArrayList<Person>()
             while (cursor.moveToNext()) {
                 // 获取联系人姓名
                 val name =
@@ -42,18 +45,38 @@ class MainViewModel : ViewModel() {
                 // 获取联系人手机号
                 val number =
                     cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                result.add(Person(name, number))
+                list.add(Person(name, number))
             }
             cursor.close()
-            return result
         }
-
-        return emptyList()
+        localContacts.value = list
     }
-
-    fun getToken(): String = token.value ?: ""
 
     fun getUserName(): String = userName.value ?: ""
 
-    fun getBaseUrl(): String = baseurl.value ?: ""
+    suspend fun pull(): ContactsEntity = withContext(Dispatchers.IO) {
+        val headerMap = mapOf("Authorization" to (token.value ?: ""))
+        val service = getRetrofitService(Service::class.java)
+        val call = service.pull(headerMap)
+        call.execute().body() ?: ContactsEntity()
+    }
+
+    suspend fun push(): Boolean =
+        withContext(Dispatchers.IO) {
+            val headerMap = mapOf("Authorization" to (token.value ?: ""))
+            val service = getRetrofitService(Service::class.java)
+            val call =
+                service.push(headerMap, ContactsEntity(localContacts.value ?: mutableListOf()))
+            call.execute().isSuccessful
+        }
+
+    suspend fun merge() = withContext(Dispatchers.IO) {
+        val contactsEntity = pull()
+        val cloudyContacts = contactsEntity.persons
+        if (cloudyContacts.isEmpty()) {
+            return@withContext
+        }
+
+//        localContacts.value =
+    }
 }

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,8 +17,6 @@ class LocalListFragment : Fragment() {
     }
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ContactsAdapter
-
     companion object {
         fun newInstance(): LocalListFragment {
             return LocalListFragment()
@@ -40,19 +39,19 @@ class LocalListFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
         recyclerView.layoutParams = layoutParam
-        adapter = ContactsAdapter()
+        val adapter = ContactsAdapter()
+        recyclerView.adapter = adapter
+
+        mainViewModel.localContacts.observe(context as MainActivity, Observer {
+            adapter.setData(it)
+        })
+
         return recyclerView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fillLocal(recyclerView)
-    }
-
-    private fun fillLocal(recyclerView: RecyclerView) {
-        val dataList = mainViewModel.readLocalContacts(context!!)
-        adapter.setData(dataList)
-        recyclerView.adapter = adapter
+        mainViewModel.readLocalContacts(context!!)
     }
 }

@@ -17,6 +17,8 @@ import com.example.androidclient.event.UserNameEvent
 import com.example.androidclient.login.LoginActivity
 import com.example.androidclient.url_setting.UrlSettingActivity
 import kotlinx.android.synthetic.main.fragment_sync.view.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -25,6 +27,7 @@ class SyncFragment : Fragment() {
     private val mainViewModel by lazy {
         ViewModelProviders.of(context as MainActivity).get(MainViewModel::class.java)
     }
+    private val scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,15 +81,19 @@ class SyncFragment : Fragment() {
         mainViewModel.userName.value = mainViewModel.getUserName()
     }
 
-    private fun pushData() {
+    private fun pushData() = scope.launch {
         val dialog = createProgressDialog()
+        mainViewModel.push()
         dialog.cancel()
     }
 
-    private fun pullData() {
+
+    private fun pullData() = scope.launch {
         val dialog = createProgressDialog()
+        mainViewModel.merge()
         dialog.cancel()
     }
+
 
     private fun showTextDialog(
         title: String,
@@ -119,7 +126,7 @@ class SyncFragment : Fragment() {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun updateTextView(event:UserNameEvent) {
+    fun onUserNameEvent(event: UserNameEvent) {
         mainViewModel.userName.value = event.userName
     }
 

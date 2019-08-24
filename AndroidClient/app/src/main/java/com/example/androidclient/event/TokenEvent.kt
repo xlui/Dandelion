@@ -1,3 +1,3 @@
 package com.example.androidclient.event
 
-class TokenEvent(token: String)
+class TokenEvent(val token: String)
