@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:after_layout/after_layout.dart';
 import 'package:android/login.dart';
 import 'package:android/utils.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'consts.dart';
 
 class LocalContact extends StatefulWidget {
   @override
@@ -166,7 +172,31 @@ class _LocalContactState extends State<LocalContact>
       );
       return;
     }
-    // TODO：上传通讯录
+
+    /// 上传通讯录
     Fluttertoast.showToast(msg: "即将上传本地联系人");
+    _uploadContacts();
+  }
+
+  void _uploadContacts() {
+    Dio(BaseOptions(
+      baseUrl: getBaseUrl(_prefs),
+      contentType: ContentType.json,
+      headers: {"Authorization": "JWT ${getAccessToken(_prefs)}"},
+    )).post(
+        pathUpload,
+        data: _contacts.map((contact) =>
+        {
+          "displayName": contact.displayName,
+          "phones": contact.phones.join(", ")
+        }).toList(growable: false)
+    ).then((response) {
+      var resp = json.decode(response.toString());
+      Fluttertoast.showToast(msg: resp['data']);
+      print('Response: $response');
+    }).catchError((error) {
+      Fluttertoast.showToast(msg: '上传本地通讯录失败，可能是本地 Token 已过期，请重新登录！');
+      print('Error: $error');
+    });
   }
 }

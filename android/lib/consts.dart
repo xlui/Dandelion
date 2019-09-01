@@ -3,3 +3,5 @@ final accessToken = "access_token";
 final baseUrl = "base_url";
 /// HTTP 请求接口
 final pathLogin = "/login";
+final pathUpload = "/push";
+final pathDownload = "/pull";
