@@ -130,15 +130,22 @@ class _LoginState extends State<Login> with AfterLayoutMixin<Login> {
 
   void _login() {
     setBaseUrl(_prefs, 'https://dandelion.xlui.app');
-    Dio(BaseOptions(baseUrl: getBaseUrl(_prefs), contentType: ContentType.json))
-        .post(pathLogin, data: {
-      "username": usernameController.text,
-      "password": passwordController.text
-    }).then((Response response) {
+    Dio(BaseOptions(
+        baseUrl: getBaseUrl(_prefs),
+        contentType: ContentType.json
+    )
+    ).post(
+        pathLogin,
+        data: {
+          "username": usernameController.text,
+          "password": passwordController.text
+        }).then((response) {
       var resp = json.decode(response.toString());
       setAccessToken(_prefs, resp['access_token']);
       Fluttertoast.showToast(msg: '登录成功！');
       Navigator.pop(context);
+    }).timeout(timeout, onTimeout: () {
+      Fluttertoast.showToast(msg: "调用登录接口超时，请检查服务器配置！");
     }).catchError((error) {
       showDialog(
         context: context,
