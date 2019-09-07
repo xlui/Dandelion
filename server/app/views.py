@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from flask_jwt import jwt_required, current_identity
 
@@ -307,7 +309,7 @@ def push():
     user = User.query.filter_by(id=current_identity.id).scalar()
     if not user:
         return Response(Code.InternalError, error='无Token对应用户，但是Token有效，用户可能已被删除，请重新注册！').build()
-    user.record = str(request.json)
+    user.record = json.dumps(request.json)
     db.session.add(user)
     db.session.commit()
     return Response(Code.OK, data=f'成功更新 {user.username} 的通讯录！').build()
