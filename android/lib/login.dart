@@ -1,33 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:after_layout/after_layout.dart';
 import 'package:android/consts.dart';
 import 'package:android/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'globals.dart';
 
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> with AfterLayoutMixin<Login> {
+class _LoginState extends State<Login> {
   final style = TextStyle(fontFamily: 'Montserrat', fontSize: 16.0);
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  SharedPreferences _prefs;
-
-  @override
-  void afterFirstLayout(BuildContext context) {
-    SharedPreferences.getInstance().then((prefs) {
-      setState(() {
-        _prefs = prefs;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,19 +119,19 @@ class _LoginState extends State<Login> with AfterLayoutMixin<Login> {
   }
 
   void _login() {
-    setBaseUrl(_prefs, 'https://dandelion.xlui.app');
+    setBaseUrl(prefs, 'https://dandelion.xlui.app');
     Dio(BaseOptions(
-        baseUrl: getBaseUrl(_prefs),
-        contentType: ContentType.json
-    )
+        baseUrl: getBaseUrl(prefs),
+        contentType: ContentType.json)
     ).post(
         pathLogin,
         data: {
           "username": usernameController.text,
           "password": passwordController.text
-        }).then((response) {
+        },
+    ).then((response) {
       var resp = json.decode(response.toString());
-      setAccessToken(_prefs, resp['access_token']);
+      setAccessToken(prefs, resp['access_token']);
       Fluttertoast.showToast(msg: '登录成功！');
       Navigator.pop(context);
     }).timeout(timeout, onTimeout: () {
@@ -153,7 +143,7 @@ class _LoginState extends State<Login> with AfterLayoutMixin<Login> {
           return AlertDialog(
             title: Text('调用接口失败！'),
             content: Text(
-                '尝试登录失败，请检查 BaseUrl 和输入！\nBase URL: ${getBaseUrl(_prefs)}'),
+                '尝试登录失败，请检查 BaseUrl 和输入！\nBase URL: ${getBaseUrl(prefs)}'),
           );
         },
       );

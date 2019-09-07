@@ -10,9 +10,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'consts.dart';
+import 'globals.dart';
 
 class LocalContact extends StatefulWidget {
   @override
@@ -21,15 +21,13 @@ class LocalContact extends StatefulWidget {
 
 class _LocalContactState extends State<LocalContact>
     with AfterLayoutMixin<LocalContact> {
-  final textEditingController = TextEditingController();
+  final _textEditingController = TextEditingController();
   var _contacts = List<Contact>();
-  SharedPreferences _prefs;
 
   /// UI 加载完成后从本地加载联系人，并通过 setState 通知 UI 刷新
   @override
   void afterFirstLayout(BuildContext context) {
     _loadContacts();
-    _loadSharedPreferences();
   }
 
   /// 加载联系人
@@ -37,15 +35,6 @@ class _LocalContactState extends State<LocalContact>
     ContactsService.getContacts().then((contacts) {
       setState(() {
         _contacts = contacts.toList(growable: false);
-      });
-    });
-  }
-
-  /// 加载内存访问组件
-  void _loadSharedPreferences() {
-    SharedPreferences.getInstance().then((prefs) {
-      setState(() {
-        _prefs = prefs;
       });
     });
   }
@@ -67,7 +56,8 @@ class _LocalContactState extends State<LocalContact>
   /// 如果用户没有登录，则跳转到登录界面；
   /// 如果已登录，则上传本地通讯录。
   void _loginOrUpload() {
-    if (!isBaseUrlSet(_prefs)) {
+    if (!isBaseUrlSet(prefs)) {
+      _textEditingController.text = "";
       showDialog(
         context: context,
         builder: (context) {
@@ -75,7 +65,7 @@ class _LocalContactState extends State<LocalContact>
             title: Text("请首先配置服务器地址！"),
             content: TextField(
               decoration: InputDecoration(hintText: "TextField in the dialog"),
-              controller: textEditingController,
+              controller: _textEditingController,
             ),
             actions: <Widget>[
               FlatButton(
@@ -85,7 +75,7 @@ class _LocalContactState extends State<LocalContact>
               FlatButton(
                 child: Text("提交"),
                 onPressed: () {
-                  setBaseUrl(_prefs, textEditingController.text);
+                  setBaseUrl(prefs, _textEditingController.text);
                   Navigator.pop(context);
                 },
               ),
@@ -95,7 +85,7 @@ class _LocalContactState extends State<LocalContact>
       );
       return;
     }
-    if (!isLoggedIn(_prefs)) {
+    if (!isLoggedIn(prefs)) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -111,12 +101,12 @@ class _LocalContactState extends State<LocalContact>
   }
 
   void _uploadContacts() {
-    setBaseUrl(_prefs, "https://dandelion.xlui.app");
-    Dio(BaseOptions(
-      baseUrl: getBaseUrl(_prefs),
-      contentType: ContentType.json,
-      headers: {"Authorization": "JWT ${getAccessToken(_prefs)}"},
-    )).post(
+    Dio(
+      BaseOptions(
+          baseUrl: getBaseUrl(prefs),
+          contentType: ContentType.json,
+          headers: {"Authorization": "JWT ${getAccessToken(prefs)}"}),
+    ).post(
       pathUpload,
       data: jsonEncode(_contacts
           .map((contact) =>
@@ -124,7 +114,8 @@ class _LocalContactState extends State<LocalContact>
         "displayName": contact.displayName,
         "phones": contact.phones.map((item) => item.value).join(", ")
       })
-          .toList(growable: false)),
+          .toList(growable: false)
+      ),
     ).then((response) {
       var resp = json.decode(response.toString());
       Fluttertoast.showToast(msg: resp['data']);

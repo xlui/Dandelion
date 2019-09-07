@@ -29,6 +29,7 @@ dependencies:
   after_layout: ^1.0.7
   shared_preferences: ^0.5.3+4
   dio: ^2.1.16
+  validators: ^2.0.0
 
 dev_dependencies:
   flutter_test:
