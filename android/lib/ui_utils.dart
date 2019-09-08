@@ -1,6 +1,20 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 
+import 'login.dart';
+
+void toLogin(BuildContext context, {Function onSuccess}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) =>
+          Login(
+            onSuccess: onSuccess,
+          ),
+    ),
+  );
+}
+
 /// 构建联系人界面
 Widget drawBody(BuildContext context, List<Contact> contacts) {
   var listTiles = List<Widget>();

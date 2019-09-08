@@ -10,6 +10,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'globals.dart';
 
 class Login extends StatefulWidget {
+  Login({this.onSuccess});
+
+  final onSuccess;
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -121,18 +125,23 @@ class _LoginState extends State<Login> {
   void _login() {
     setBaseUrl(prefs, 'https://dandelion.xlui.app');
     Dio(BaseOptions(
-        baseUrl: getBaseUrl(prefs),
-        contentType: ContentType.json)
-    ).post(
-        pathLogin,
-        data: {
-          "username": usernameController.text,
-          "password": passwordController.text
-        },
+      baseUrl: getBaseUrl(prefs),
+      contentType: ContentType.json,
+    )).post(
+      pathLogin,
+      data: {
+        "username": usernameController.text,
+        "password": passwordController.text
+      },
     ).then((response) {
       var resp = json.decode(response.toString());
       setAccessToken(prefs, resp['access_token']);
+      setUsername(prefs, usernameController.text);
       Fluttertoast.showToast(msg: '登录成功！');
+      // 调用回调
+      if (widget.onSuccess != null) {
+        widget.onSuccess();
+      }
       Navigator.pop(context);
     }).timeout(timeout, onTimeout: () {
       Fluttertoast.showToast(msg: "调用登录接口超时，请检查服务器配置！");
@@ -142,8 +151,8 @@ class _LoginState extends State<Login> {
         builder: (context) {
           return AlertDialog(
             title: Text('调用接口失败！'),
-            content: Text(
-                '尝试登录失败，请检查 BaseUrl 和输入！\nBase URL: ${getBaseUrl(prefs)}'),
+            content:
+            Text('尝试登录失败，请检查 BaseUrl 和输入！\nBase URL: ${getBaseUrl(prefs)}'),
           );
         },
       );

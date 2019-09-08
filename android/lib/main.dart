@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:after_layout/after_layout.dart';
+import 'package:android/consts.dart';
 import 'package:android/contact_local.dart';
 import 'package:android/contact_remote.dart';
 import 'package:android/globals.dart';
+import 'package:android/ui_utils.dart';
 import 'package:android/utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -46,6 +52,7 @@ class _HomeState extends State<Home> with AfterLayoutMixin<Home> {
   var _status = PermissionStatus.unknown;
   int _currentIndex = 0;
   StatefulWidget _currentWidget = LocalContact();
+  bool loggedIn = false;
 
   /// 只在UI界面绘制完成后调用一次
   @override
@@ -55,6 +62,9 @@ class _HomeState extends State<Home> with AfterLayoutMixin<Home> {
     // 设置全局数据访问接口
     SharedPreferences.getInstance().then((_prefs) {
       prefs = _prefs;
+      setState(() {
+        loggedIn = isLoggedIn(prefs);
+      });
     });
   }
 
@@ -108,13 +118,9 @@ class _HomeState extends State<Home> with AfterLayoutMixin<Home> {
   /// 构建侧栏
   List<Widget> _buildDrawerChildren() {
     var drawer = List<Widget>();
+    // body
     drawer.addAll([
-      // TODO: 添加用户头像，判断是否登录
-      DrawerHeader(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-        decoration: BoxDecoration(color: theme),
-        child: Text('Drawer Header'),
-      ),
+      _buildDrawerHeader(),
       ListTile(
         title: Text('本地联系人'),
         onTap: _loadLocalContact,
@@ -130,9 +136,92 @@ class _HomeState extends State<Home> with AfterLayoutMixin<Home> {
       ListTile(
         title: Text('设置服务器地址'),
         onTap: _configBaseUrl,
-      )
+      ),
+      _buildLoginOrLogoutOption(),
     ]);
     return drawer;
+  }
+
+  /// 构建侧栏 header
+  Widget _buildDrawerHeader() {
+    if (loggedIn) {
+      var content = Utf8Encoder().convert(getUsername(prefs));
+      var digest = md5.convert(content).toString();
+      return UserAccountsDrawerHeader(
+        accountName: Text(getUsername(prefs)),
+        accountEmail: null,
+        // 从 Gravatar 加载头像并缓存
+        currentAccountPicture: GestureDetector(
+          child: CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(
+              gravatar.replaceFirst(placeholder, digest),
+            ),
+          ),
+          onTap: () {
+            Fluttertoast.showToast(msg: (greet..shuffle()).first);
+          },
+        ),
+      );
+    } else {
+      var content = Utf8Encoder().convert(DateTime.now().toIso8601String());
+      var randomDigest = md5.convert(content).toString();
+      return UserAccountsDrawerHeader(
+        accountName: GestureDetector(
+          child: Text("未登录！"),
+          onTap: () {
+            toLogin(context, onSuccess: () {
+              setState(() {
+                loggedIn = true;
+              });
+            });
+          },
+        ),
+        accountEmail: null,
+        // 未登录用户的头像是依据时间戳生成的
+        currentAccountPicture: GestureDetector(
+          child: CircleAvatar(
+            backgroundImage:
+            NetworkImage(gravatar.replaceFirst(placeholder, randomDigest)),
+          ),
+          onTap: () {
+            toLogin(context, onSuccess: () {
+              setState(() {
+                loggedIn = true;
+              });
+            });
+          },
+        ),
+      );
+    }
+  }
+
+  /// 构建登入、登出侧栏
+  Widget _buildLoginOrLogoutOption() {
+    if (loggedIn) {
+      return ListTile(
+        title: Text("退出登录"),
+        onTap: () {
+          delAccessToken(prefs);
+          delUsername(prefs);
+          setState(() {
+            loggedIn = false;
+          });
+          Fluttertoast.showToast(msg: "退出登录成功");
+          Navigator.pop(context);
+        },
+      );
+    } else {
+      return ListTile(
+        title: Text("登录"),
+        onTap: () {
+          toLogin(context, onSuccess: () {
+            setState(() {
+              loggedIn = true;
+            });
+          });
+        },
+      );
+    }
   }
 
   /// 配置服务器地址

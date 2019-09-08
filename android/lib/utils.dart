@@ -15,8 +15,14 @@ String getAccessToken(SharedPreferences prefs) =>
 void setAccessToken(SharedPreferences prefs, String _accessToken) =>
     prefs?.setString(accessToken, _accessToken);
 
-void delAccessToken(SharedPreferences prefs) =>
-    prefs?.remove(accessToken);
+void delAccessToken(SharedPreferences prefs) => prefs?.remove(accessToken);
 
 bool isLoggedIn(SharedPreferences prefs) =>
     getAccessToken(prefs)?.isNotEmpty ?? false;
+
+String getUsername(SharedPreferences prefs) => prefs?.getString(username) ?? "";
+
+void setUsername(SharedPreferences prefs, String _username) =>
+    prefs?.setString(username, _username);
+
+void delUsername(SharedPreferences prefs) => prefs?.remove(username);

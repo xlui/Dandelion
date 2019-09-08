@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:after_layout/after_layout.dart';
 import 'package:android/login.dart';
 import 'package:android/ui_utils.dart';
 import 'package:android/utils.dart';
@@ -17,13 +18,13 @@ class RemoteContact extends StatefulWidget {
   _RemoteContactState createState() => _RemoteContactState();
 }
 
-class _RemoteContactState extends State<RemoteContact> {
+class _RemoteContactState extends State<RemoteContact>
+    with AfterLayoutMixin<RemoteContact> {
   var _contacts = List<Contact>();
 
   @override
-  void initState() {
+  void afterFirstLayout(BuildContext context) {
     _loadContacts();
-    super.initState();
   }
 
   /// 拉取云端联系人
@@ -42,6 +43,10 @@ class _RemoteContactState extends State<RemoteContact> {
       headers: {"Authorization": "JWT ${getAccessToken(prefs)}"},
     )).get(pathDownload).then((response) {
       var resp = json.decode(response.toString());
+      if (resp['data'] == null) {
+        Fluttertoast.showToast(msg: "服务器返回结果为空，尚未上传本地联系人？");
+        return;
+      }
       setState(() {
         _contacts = _parseContact(resp['data']);
       });
@@ -53,6 +58,7 @@ class _RemoteContactState extends State<RemoteContact> {
       if (401 == resp["status_code"]) {
         Fluttertoast.showToast(msg: "登录信息已过期，请重新登录！");
         delAccessToken(prefs);
+        delUsername(prefs);
         return;
       }
       Fluttertoast.showToast(msg: "拉取云端联系人失败，请检查服务器设置！");
@@ -62,9 +68,7 @@ class _RemoteContactState extends State<RemoteContact> {
 
   /// 解析联系人JSON
   List<Contact> _parseContact(String contacts) {
-    print('Contacts: $contacts');
     var contactList = json.decode(contacts) as List;
-    print('ContactList: $contactList');
     return contactList.map((contactMap) {
       var contact = Contact();
       contact.displayName = contactMap['displayName'];
