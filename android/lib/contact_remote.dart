@@ -28,7 +28,7 @@ class _RemoteContactState extends State<RemoteContact>
   }
 
   /// 拉取云端联系人
-  void _loadContacts() {
+  void _loadContacts({Function callback}) {
     if (!isLoggedIn(prefs)) {
       Fluttertoast.showToast(msg: "请先登录！");
       Navigator.push(
@@ -37,6 +37,7 @@ class _RemoteContactState extends State<RemoteContact>
       );
       return;
     }
+    Fluttertoast.showToast(msg: "开始拉取云端联系人");
     Dio(BaseOptions(
       baseUrl: getBaseUrl(prefs),
       contentType: ContentType.json,
@@ -51,6 +52,9 @@ class _RemoteContactState extends State<RemoteContact>
         _contacts = _parseContact(resp['data']);
       });
       Fluttertoast.showToast(msg: "成功拉取云端联系人");
+      if (callback != null) {
+        callback();
+      }
     }).timeout(timeout, onTimeout: () {
       Fluttertoast.showToast(msg: "请求服务器接口超时，请检查服务器设置！");
     }).catchError((error) {
@@ -85,8 +89,70 @@ class _RemoteContactState extends State<RemoteContact>
       floatingActionButton: FloatingActionButton(
         tooltip: 'Dwonload',
         child: Icon(Icons.arrow_downward),
-        onPressed: _loadContacts,
+        onPressed: _onDownloadPress,
       ),
     );
+  }
+
+  /// 提供按钮选项
+  void _onDownloadPress() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("请选择要进行的操作："),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("查看云端联系人"),
+              onPressed: () {
+                _loadContacts();
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text("同步云端联系人到本地"),
+              onPressed: _mergeRemoteContacts,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 拉取云端联系人并合并到本地
+  void _mergeRemoteContacts() {
+    _loadContacts(callback: () {
+      Fluttertoast.showToast(msg: "开始同步云端联系人到本地");
+      ContactsService.getContacts().then((contacts) {
+        // 将本地联系人转为 displayName:Contact 的形式，方便验证云端是否存在相同联系人
+        var contactMap = Map<String, Contact>.fromIterable(
+          contacts,
+          key: (item) => item.displayName,
+          value: (item) => item,
+        );
+        // 对每个本地联系人分别处理
+        for (var newContact in _contacts) {
+          if (contactMap.containsKey(newContact.displayName)) {
+            // 如果云端存在和本地联系人同名的联系人，则合并手机号
+            var oldPhones = contactMap[newContact.displayName].phones.toList();
+            var oldPhoneSet = oldPhones.map((item) => item.value).toSet();
+            // 将本地不存在的手机号合并进本地手机号列表
+            newContact.phones
+                .skipWhile((item) => oldPhoneSet.contains(item.value))
+                .forEach((item) => oldPhones.add(item));
+            // 更新本地手机号引用
+            contactMap[newContact.displayName].phones = oldPhones;
+            // 更新本地联系人
+            ContactsService.updateContact(contactMap[newContact.displayName]);
+          } else {
+            // 如果云端不存在和本地联系人同名联系人，则新建联系人
+            newContact.givenName = newContact.displayName;
+            ContactsService.addContact(newContact);
+          }
+        }
+        Fluttertoast.showToast(msg: "同步完成！");
+        Navigator.pop(context);
+      });
+    });
   }
 }
