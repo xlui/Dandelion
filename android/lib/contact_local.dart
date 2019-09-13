@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'consts.dart';
 import 'globals.dart';
@@ -22,6 +23,7 @@ class LocalContact extends StatefulWidget {
 class _LocalContactState extends State<LocalContact>
     with AfterLayoutMixin<LocalContact> {
   final _textEditingController = TextEditingController();
+  final _refreshController = RefreshController();
   var _contacts = List<Contact>();
 
   /// UI 加载完成后从本地加载联系人，并通过 setState 通知 UI 刷新
@@ -42,7 +44,16 @@ class _LocalContactState extends State<LocalContact>
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: drawBody(context, _contacts),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        onRefresh: () {
+          _loadContacts();
+          Fluttertoast.showToast(msg: "刷新成功 (～￣▽￣)～");
+          _refreshController.refreshCompleted();
+        },
+        child: drawBody(context, _contacts),
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Upload',
         child: Icon(Icons.arrow_upward),

@@ -9,6 +9,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'consts.dart';
 import 'globals.dart';
@@ -20,11 +21,12 @@ class RemoteContact extends StatefulWidget {
 
 class _RemoteContactState extends State<RemoteContact>
     with AfterLayoutMixin<RemoteContact> {
+  final _refreshController = RefreshController();
   var _contacts = List<Contact>();
 
   @override
   void afterFirstLayout(BuildContext context) {
-    _loadContacts();
+    _loadContacts(callback: () => Fluttertoast.showToast(msg: "成功拉取云端联系人"));
   }
 
   /// 拉取云端联系人
@@ -51,7 +53,6 @@ class _RemoteContactState extends State<RemoteContact>
       setState(() {
         _contacts = _parseContact(resp['data']);
       });
-      Fluttertoast.showToast(msg: "成功拉取云端联系人");
       if (callback != null) {
         callback();
       }
@@ -85,7 +86,17 @@ class _RemoteContactState extends State<RemoteContact>
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: drawBody(context, _contacts),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        onRefresh: () {
+          _loadContacts(
+            callback: () => Fluttertoast.showToast(msg: "加载成功 (～￣▽￣)～"),
+          );
+          _refreshController.refreshCompleted();
+        },
+        child: drawBody(context, _contacts),
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Dwonload',
         child: Icon(Icons.arrow_downward),
@@ -105,7 +116,9 @@ class _RemoteContactState extends State<RemoteContact>
             FlatButton(
               child: Text("查看云端联系人"),
               onPressed: () {
-                _loadContacts();
+                _loadContacts(
+                  callback: () => Fluttertoast.showToast(msg: "成功拉取云端联系人"),
+                );
                 Navigator.pop(context);
               },
             ),
