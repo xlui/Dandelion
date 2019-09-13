@@ -107,17 +107,45 @@ class _LocalContactState extends State<LocalContact>
     }
 
     /// 上传通讯录
-    Fluttertoast.showToast(msg: "即将上传本地联系人");
-    _uploadContacts();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("上传本地联系人到云端？"),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                child: Text("取消"),
+                textColor: Colors.blue,
+                onPressed: () => Navigator.pop(context),
+              ),
+              FlatButton(
+                child: Text("确定"),
+                textColor: Colors.blue,
+                onPressed: () {
+                  Fluttertoast.showToast(msg: "即将上传本地联系人");
+                  _uploadContacts();
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _uploadContacts() {
     Dio(
       BaseOptions(
-          baseUrl: getBaseUrl(prefs),
-          contentType: ContentType.json,
-          headers: {"Authorization": "JWT ${getAccessToken(prefs)}"}),
-    ).post(
+        baseUrl: getBaseUrl(prefs),
+        contentType: ContentType.json,
+        headers: {"Authorization": "JWT ${getAccessToken(prefs)}"},
+      ),
+    )
+        .post(
       pathUpload,
       data: jsonEncode(_contacts
           .map((contact) =>
@@ -125,9 +153,9 @@ class _LocalContactState extends State<LocalContact>
         "displayName": contact.displayName,
         "phones": contact.phones.map((item) => item.value).join(", ")
       })
-          .toList(growable: false)
-      ),
-    ).then((response) {
+          .toList(growable: false)),
+    )
+        .then((response) {
       var resp = json.decode(response.toString());
       Fluttertoast.showToast(msg: resp['data']);
       print('Response: $response');

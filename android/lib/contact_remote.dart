@@ -111,22 +111,23 @@ class _RemoteContactState extends State<RemoteContact>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("请选择要进行的操作："),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("查看云端联系人"),
-              onPressed: () {
-                _loadContacts(
-                  callback: () => Fluttertoast.showToast(msg: "成功拉取云端联系人"),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            FlatButton(
-              child: Text("同步云端联系人到本地"),
-              onPressed: _mergeRemoteContacts,
-            ),
-          ],
+          title: Text("合并云端联系人到本地？"),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              FlatButton(
+                child: Text("取消"),
+                textColor: Colors.blue,
+                onPressed: () => Navigator.pop(context),
+              ),
+              FlatButton(
+                child: Text("确定"),
+                textColor: Colors.blue,
+                onPressed: _mergeRemoteContacts,
+              ),
+            ],
+          ),
         );
       },
     );
