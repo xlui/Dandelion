@@ -100,13 +100,13 @@ class _RemoteContactState extends State<RemoteContact>
       floatingActionButton: FloatingActionButton(
         tooltip: 'Dwonload',
         child: Icon(Icons.arrow_downward),
-        onPressed: _onDownloadPress,
+        onPressed: _onPressDownload,
       ),
     );
   }
 
   /// 提供按钮选项
-  void _onDownloadPress() {
+  void _onPressDownload() {
     showDialog(
       context: context,
       builder: (context) {

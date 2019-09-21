@@ -57,7 +57,7 @@ class _LocalContactState extends State<LocalContact>
       floatingActionButton: FloatingActionButton(
         tooltip: 'Upload',
         child: Icon(Icons.arrow_upward),
-        onPressed: _loginOrUpload,
+        onPressed: _onPressUpload,
       ),
     );
   }
@@ -66,7 +66,7 @@ class _LocalContactState extends State<LocalContact>
   /// 如果本地没有配置 baseUrl，则提示进行配置；
   /// 如果用户没有登录，则跳转到登录界面；
   /// 如果已登录，则上传本地通讯录。
-  void _loginOrUpload() {
+  void _onPressUpload() {
     if (!isBaseUrlSet(prefs)) {
       _textEditingController.text = "";
       showDialog(
